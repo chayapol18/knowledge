@@ -8,12 +8,12 @@
 
 ### โครงสร้าง
   <html>
-    < html>
-      < head>
+   
+    <html>
+      <head>
           <ส่วนหัวของเว็บหรือการ link ข้อมูลต่างๆมาใช้ในหน้าเว็บ>
           <ที่สำหรับใส่ internal css>
       </head>
-
       <body>
           <ส่วนเนื้อหาของหน้าเว็บ>
           <ที่สำหรับใส่ internal js <script tag>>
@@ -23,11 +23,11 @@
   </html>
 
 ### Element, content
-  - < tag> content area </> ==> ทั้งหมดเรียกว่า Element
+    - <tag> content area </tag> ==> ทั้งหมดเรียกว่า Element
 
-  - < tag attribute="value"></>
+    - <tag attribute="value"></tag>
 
 ### comment in html
-  < !--
-  comment here 
-  -->
+    <!--
+    comment here 
+    -->
