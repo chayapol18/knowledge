@@ -1,6 +1,6 @@
 # Node JS
 
-## Basic Node JS>
+## Basic Node JS
     - single thread
     - เหมาะกับงานที่ต้องมีการ “รอ” เป็นจำนวนมาก
     - ให้ node เข้ามาทำงาน พิมพ์ node (ชื่อไฟล์)
@@ -8,12 +8,12 @@
         ด้วยคำสั่ง node >> คำสั่ง js ที่ต้องการ (const b = 20, console.log(b))
     - .exit จะไว้ออกจาก node บน terminal
 
-## import & export>
+## import & export
     - Node ไม่สามารถใช้ ES6 ได้ แต่สามารถใช้ libraries ในการทำให้มันทำได้อยู่เหมือนกัน
-    -import & export by "common js"
+    - import & export by "common js"
     - export 
         ด้วยคำสั่ง module.exports = สิ่งที่จะ export
-    -export key = value ด้วยคำสั่ง โดยจะ exports กี่ key ก็ได้แต่จะรวมกันเป็น object เดียว
+    - export key = value ด้วยคำสั่ง โดยจะ exports กี่ key ก็ได้แต่จะรวมกันเป็น object เดียว
         exports.username = 'John'
         exports.password = '12345678'
         { username: 'John, password: '12345678}
