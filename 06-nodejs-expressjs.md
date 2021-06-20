@@ -105,6 +105,111 @@
         
     - refresh เท่ากับ request 1 ครั้ง
 
+## วิธีสร้าง route กับ เชื่อม database
+
+    1. สร้าง file data สำหรับไว้ query datavase (rawSql)
+        ex.
+        //import สิ่งที่ใช้สำหรับ database
+        const ConnectDB = require('../database').connection
+        const APIError = require('../errors/api-error')
+
+        const { querystring, sortQuery } = require('../helpers/query-string')
+
+        //function
+        async function GetInstallList(request){
+            const { sort = 'DESC', field = 'fs_qt.qt_id', pageSize, startAt, qt_status, contact_id, text_search = '' } = querystring(request.query)
+            const client = await ConnectDB.connect();
+
+            try {
+                let sql	= `SELECT fs_qt.qt_id, fs_contact.billing_company_name, fs_contact.customer_type, fs_contact.restaurant_type, fs_contact.business_type, fs_pay.qt_payment_group_id, fs_qt.qt_number, fs_qt.project_name, fs_qt.contact_id, fs_qt.total_amount, fs_qt.discount_amount, fs_qt.sub_total, fs_qt.qt_status, fs_qt.restaurant_name, fs_qt.contact_full_name, fs_qt.contact_tel, fs_qt.create_dt, fs_qt.is_custom_address 
+                            FROM internal.fs_qt fs_qt
+                            JOIN internal.fs_contact fs_contact on fs_contact.contact_id = fs_qt.contact_id 
+                            LEFT JOIN internal.fs_qt_payment_group fs_pay ON fs_pay.qt_payment_group_id = fs_qt.qt_payment_group_id
+                            WHERE fs_qt.delete_flag = 0`
+                if (qt_status >= 0) sql += ` AND fs_qt.qt_status = ${qt_status}`
+                if (contact_id) sql += ` AND fs_qt.contact_id = ${contact_id}`
+                if (text_search) sql += ` AND lower(concat(fs_qt.qt_number, fs_qt.project_name, fs_qt.total_amount, fs_qt.restaurant_name, fs_qt.contact_full_name, fs_qt.contact_tel, fs_contact.billing_company_name)) like '%${text_search}%'`
+
+
+                sql += sortQuery(field, sort, pageSize, startAt)
+
+                let resultQTList = await client.query(sql)
+                
+                let totalSql = 'SELECT count(*) as totalrows FROM internal.fs_qt fs_qt WHERE fs_qt.delete_flag = 0 '
+                if (qt_status >= 0) totalSql += ` AND fs_qt.qt_status = ${qt_status}`
+                if (contact_id) totalSql += ` AND fs_qt.contact_id = ${contact_id}`
+                if (text_search) totalSql += ` AND concat(fs_qt.qt_number, fs_qt.project_name, fs_qt.total_amount, fs_qt.restaurant_name, fs_qt.contact_full_name, fs_qt.contact_tel) like '%${text_search}%';`
+
+                let resultTotalSql = await client.query(totalSql)
+
+                return {
+                    success: 1,
+                    code: 200,
+                    result: resultQTList.rows,
+                    totalRows: resultTotalSql.rows[0].totalrows,
+                    message: "Get Install List Success"
+                }
+
+            } catch (err) {
+                console.log('err',err);
+            await client.query('ROLLBACK')
+            if(['NotFoundError','InvalidRequestError'].includes(err.name)) throw new APIError(err.name,err.message)
+            else throw new APIError(null,'Something error to get QT detail')
+            } finally {
+            await client.release()
+            }
+        }
+
+        module.exports = {
+            GetInstallList,
+        }
+
+    2. สร้าง file service สำหรับรับข้อมูลที่ query มาจากไฟล์ data
+        ex.
+        const InstallData = require('../data/install-data')
+
+        async function getInstallListService(request) {
+            const resultData = await InstallData.GetInstallList(request)
+            return resultData
+        }
+
+        module.exports = {
+            getInstallListService,
+        }
+
+    3. สร้าง file controller
+        ex. 
+        const { expressHandler } = require('./express-handler') // น่าจะไว้จัดการกับ controller 
+        const { ServiceName } = require('../pathService')
+
+        async function getInstallListController(request){
+            const resultData = await getInstallListService(request)
+            return resultData
+        }
+
+        module.exports = {
+            getInstallListController: expressHandler({
+            handler: getInstallListController
+            }),
+        }
+
+    4. สร้าง file ที่เป็น path นั้นสำหรับการเขียน RestAPI ต่างๆ (get, post, put, patch, delete)
+        ex.
+        const ControllerName = require('/path')
+
+        const express = require('express')
+        const router = express.Router()
+
+        router.get('/list', ControllerName.controllerFunction)
+
+        module.exports = router
+
+    5. เพิ่ม path ใน index.js (folder v1) สำหรับบอกว่าเราจะใช้ path นี้ในการเข้า feature นี้
+        ex.
+        router.use('/path', middleware, require('./filepath'))
+
+
+
 # Express
     - framework ที่นิยมมากในการสร้าง web app บน Node.js
     - community กว้าง คนใช้เยอะเลยทำให้หาวิธีแก้ไขปัญหาต่างๆได้
