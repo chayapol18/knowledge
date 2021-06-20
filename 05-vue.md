@@ -32,7 +32,8 @@
       เมื่อ template เปลี่ยน ตัวแปรเปลี่ยน หรือ ตัวแปรเปลี่ยน template เปลี่ยนไปด้วย ด้วย watcher
   
 # Conditionals
-    {{variable in return}}
+    - How to use variable in return
+      {{variable}}
 
     - v-for
       - เวลาเกิดการอัพเดท item ถ้าไม่รู้ว่า item ไหน มันจะ loop แยกทุก item ทำให้ช้า ดังนั้นจึงควรใส่ key เพื่อให้ vue รู้ว่าต้องไปอัพเดท item ไหน, ควรจะเป็น key ที่ unique ที่สุด 
